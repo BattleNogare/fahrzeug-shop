@@ -1,649 +1,130 @@
-/* ================================
-   Basis-Theme – Darkmode
-   Theme-Color: #ff9900
-================================ */
+/* ========================================================================
+   GLOBAL DARK THEME — BraunTech Style
+   Theme-Farbe: #ff9900 (Orange)
+   ======================================================================== */
 
 :root {
-    --accent: #ff9900;
-    --accent-soft: rgba(255, 153, 0, 0.18);
-    --accent-strong: rgba(255, 153, 0, 0.6);
+    --bt-bg: #0c0f12;
+    --bt-bg-light: #161a1f;
+    --bt-bg-lighter: #1e242b;
 
-    --bg-page: #050608;
-    --bg-elevated: #101217;
-    --bg-elevated-soft: #161925;
+    --bt-text: #e7e7e7;
+    --bt-text-dim: #bbbbbb;
 
-    --text: #f5f5f5;
-    --text-muted: #9ca3af;
-    --text-soft: #6b7280;
+    --bt-border: rgba(255, 255, 255, 0.08);
+    --bt-border-strong: rgba(255, 255, 255, 0.15);
 
-    --border-subtle: #222633;
-    --border-strong: #323648;
+    --bt-orange: #ff9900;
+    --bt-orange-dim: #cc7a00;
 
-    --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
-    --radius-lg: 18px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
-
-    --transition-fast: 0.16s ease-out;
-    --transition-med: 0.22s ease-out;
-    --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-                 Roboto, "Helvetica Neue", Arial, sans-serif;
+    --radius: 14px;
+    --shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
 }
 
-/* ================================
-   Global
-================================ */
-
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    height: 100%;
-}
+/* ========================================================================
+   ANIMIERTER HINTERGRUND
+   ======================================================================== */
 
 body.catalog-body {
+    background: radial-gradient(circle at top left, rgba(255,153,0,0.06), transparent 60%),
+                radial-gradient(circle at bottom right, rgba(255,153,0,0.04), transparent 60%),
+                var(--bt-bg);
+    background-attachment: fixed;
+    color: var(--bt-text);
     margin: 0;
-    padding: 0;
-    font-family: var(--font-main);
-    color: var(--text);
-    background: var(--bg-page);
-    -webkit-font-smoothing: antialiased;
-    position: relative;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
     overflow-x: hidden;
 }
 
-/* Overlay offen → Scroll sperren */
-body.catalog-has-overlay {
-    overflow: hidden;
+/* Light Glow Drift Animation */
+@keyframes softGlowMove {
+    0%   { background-position: 0% 0%, 100% 100%; }
+    50%  { background-position: 50% 30%, 50% 70%; }
+    100% { background-position: 0% 0%, 100% 100%; }
 }
 
-/* ================================
-   Animierter Hintergrund
-================================ */
-
-body.catalog-body::before {
-    content: "";
-    position: fixed;
-    inset: -40%;
-    z-index: -1;
-    background:
-        radial-gradient(900px 600px at 0% 0%, rgba(255, 153, 0, 0.26), transparent 65%),
-        radial-gradient(900px 600px at 100% 100%, rgba(255, 153, 0, 0.16), transparent 65%),
-        radial-gradient(700px 400px at 50% 120%, rgba(15, 23, 42, 0.9), rgba(3, 7, 18, 1));
-    opacity: 0.9;
-    animation: bgGlowMove 32s ease-in-out infinite alternate;
-    pointer-events: none;
+body.catalog-body {
+    animation: softGlowMove 22s ease-in-out infinite;
 }
 
-@keyframes bgGlowMove {
-    0% {
-        transform: translate3d(0, 0, 0) scale(1);
-        filter: hue-rotate(0deg) saturate(1.05);
-    }
-    25% {
-        transform: translate3d(-3%, -2%, 0) scale(1.03);
-        filter: hue-rotate(8deg) saturate(1.1);
-    }
-    50% {
-        transform: translate3d(3%, 2%, 0) scale(1.04);
-        filter: hue-rotate(-6deg) saturate(1.05);
-    }
-    75% {
-        transform: translate3d(-2%, 3%, 0) scale(1.02);
-        filter: hue-rotate(4deg) saturate(1.08);
-    }
-    100% {
-        transform: translate3d(2%, -3%, 0) scale(1.05);
-        filter: hue-rotate(-4deg) saturate(1.1);
-    }
-}
-
-/* Dezenter Overlay-Noise (optional, für mehr "Depth") */
-body.catalog-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background-image:
-        radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.8) 1px, transparent 0);
-    background-size: 4px 4px;
-    opacity: 0.16;
-    pointer-events: none;
-}
-
-/* ================================
-   Page Layout
-================================ */
+/* ========================================================================
+   PAGE WRAPPER
+   ======================================================================== */
 
 .catalog-page {
-    max-width: 1240px;
+    max-width: 1360px;
     margin: 0 auto;
-    padding: 2.2rem 1.3rem 2rem;
+    padding: 1.5rem;
 }
 
-@media (max-width: 640px) {
-    .catalog-page {
-        padding-inline: 0.9rem;
-    }
-}
-
-/* ================================
-   Header
-================================ */
+/* ========================================================================
+   HEADER
+   ======================================================================== */
 
 .catalog-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 1.1rem 1.3rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
-    background:
-        radial-gradient(800px 450px at 0% 0%, rgba(255, 153, 0, 0.16), transparent 60%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.5));
-    box-shadow:
-        0 14px 45px rgba(0, 0, 0, 0.7),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.catalog-header-brand {
+    margin-top: 1.2rem;
+    margin-bottom: 1.8rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
 }
 
 .catalog-title {
     margin: 0;
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 2.2rem;
     font-weight: 700;
+    color: var(--bt-orange);
 }
 
 .catalog-subtitle {
     margin: 0;
-    color: var(--text-muted);
-    font-size: 0.96rem;
+    font-size: 1.05rem;
+    color: var(--bt-text-dim);
 }
 
-.catalog-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.catalog-header-actions > * {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-/* ================================
-   Hinweis / Status
-================================ */
-
-.catalog-hint-section {
-    margin-top: 1.2rem;
-    margin-bottom: 0.6rem;
-}
+/* ========================================================================
+   HINT BOX
+   ======================================================================== */
 
 .catalog-hint {
-    padding: 0.85rem 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.6));
-    color: var(--text-muted);
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--bt-border);
+    border-left: 4px solid var(--bt-orange);
+    background: var(--bt-bg-light);
+    border-radius: var(--radius);
     font-size: 0.95rem;
+    color: var(--bt-text);
+    margin-bottom: 1.4rem;
+    box-shadow: var(--shadow);
 }
 
 .catalog-hint-error {
-    border-color: #f97373;
-    color: #fecaca;
-    background:
-        radial-gradient(650px 350px at 10% -10%, rgba(248, 113, 113, 0.18), transparent 60%),
-        linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98));
+    border-left-color: #ff5c5c;
+    color: #ffb3b3;
 }
 
-/* ================================
-   Main / Gruppen
-================================ */
-
-.catalog-main {
-    margin-top: 1.4rem;
-}
-
-.catalog-grid-section {
-    padding: 0;
-}
-
-/* vehicle-grid enthält jetzt Gruppen */
-.vehicle-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.6rem;
-}
-
-/* Gruppe nach Typ */
-.vehicle-group {
-    padding: 1.1rem 1.15rem 1.0rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(31, 41, 55, 0.85);
-    background:
-        radial-gradient(800px 450px at 0% 0%, rgba(255, 153, 0, 0.12), transparent 65%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(10, 16, 30, 0.96));
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-}
-
-.vehicle-group-title {
-    margin: 0 0 0.7rem;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.11em;
-    font-weight: 600;
-    color: var(--accent);
-}
-
-/* Grid innerhalb einer Gruppe */
-.vehicle-group-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.0rem;
-}
-
-@media (max-width: 980px) {
-    .vehicle-group-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 640px) {
-    .vehicle-group-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-/* ================================
-   Fahrzeugkarten
-================================ */
-
-.vehicle-card {
-    position: relative;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    border: 1px solid var(--border-subtle);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.82));
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
-    cursor: pointer;
-    transition:
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast),
-        border-color var(--transition-fast),
-        background var(--transition-fast);
-    display: flex;
-    flex-direction: column;
-    min-height: 280px;
-}
-
-.vehicle-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(400px 180px at 0 0, rgba(255, 153, 0, 0.24), transparent 70%);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition-med);
-}
-
-.vehicle-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.75);
-    border-color: var(--accent-soft);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(8, 10, 18, 0.96));
-}
-
-.vehicle-card:hover::before {
-    opacity: 1;
-}
-
-.vehicle-card-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    background: #020617;
-    display: block;
-}
-
-.vehicle-card-meta {
-    padding: 0.75rem 0.95rem 0.9rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.vehicle-card-name {
-    margin: 0;
-    font-size: 1.03rem;
-    font-weight: 600;
-}
-
-.vehicle-card-price {
-    margin: 0;
-    font-size: 0.98rem;
-    color: var(--accent);
-    font-weight: 600;
-}
-
-.vehicle-card-speed {
-    margin: 0.05rem 0 0;
-    font-size: 0.9rem;
-    color: var(--text-soft);
-}
-
-/* ================================
-   Footer
-================================ */
-
-.catalog-footer {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-subtle);
-    text-align: center;
-}
-
-.catalog-footer-text {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-}
-
-/* ================================
-   Overlay / Modal
-================================ */
-
-.vehicle-overlay {
-    position: fixed;
-    inset: 0;
-    display: none;
-    z-index: 40;
-}
-
-.vehicle-overlay.vehicle-overlay-open {
-    display: block;
-}
-
-.vehicle-overlay-backdrop {
-    position: absolute;
-    inset: 0;
-    backdrop-filter: blur(4px) saturate(120%);
-    background:
-        radial-gradient(900px 700px at 10% -10%, rgba(255, 153, 0, 0.32), transparent 70%),
-        radial-gradient(900px 700px at 100% 110%, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.95));
-}
-
-/* Modal-Container */
-.vehicle-modal {
-    position: relative;
-    z-index: 41;
-    max-width: 1040px;
-    width: calc(100% - 2.4rem);
-    max-height: calc(100% - 2.4rem);
-    margin: 1.2rem auto;
-    border-radius: 22px;
-    border: 1px solid var(--border-strong);
-    background:
-        radial-gradient(900px 450px at 0 0, rgba(255, 153, 0, 0.2), transparent 65%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(3, 7, 18, 0.98));
-    box-shadow:
-        0 32px 90px rgba(0, 0, 0, 0.9),
-        0 0 0 1px rgba(148, 163, 184, 0.07);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Close-Button */
-.vehicle-modal-close {
-    position: absolute;
-    top: 0.65rem;
-    right: 0.8rem;
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    border: 1px solid var(--border-subtle);
-    background: rgba(15, 23, 42, 0.9);
-    color: var(--text-soft);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    line-height: 1;
-    padding: 0;
-    transition:
-        background var(--transition-fast),
-        color var(--transition-fast),
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast),
-        border-color var(--transition-fast);
-}
-
-.vehicle-modal-close:hover {
-    background: var(--accent-strong);
-    color: #000;
-    border-color: var(--accent);
-    transform: translateY(-1px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
-}
-
-/* Modal Layout */
-.vehicle-modal-layout {
-    display: grid;
-    grid-template-columns: 1.1fr 1.1fr;
-    gap: 0;
-}
-
-@media (max-width: 960px) {
-    .vehicle-modal-layout {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-/* Linke Seite: Bilder */
-.vehicle-modal-media {
-    background:
-        radial-gradient(900px 600px at 10% 0, rgba(255, 153, 0, 0.25), transparent 65%),
-        linear-gradient(180deg, #020617, #020617);
-    border-right: 1px solid rgba(15, 23, 42, 0.9);
-    display: flex;
-    flex-direction: column;
-}
-
-.vehicle-modal-image-main {
-    width: 100%;
-    height: 320px;
-    object-fit: contain;
-    background: #020617;
-}
-
-.vehicle-modal-gallery {
-    display: flex;
-    gap: 0.4rem;
-    padding: 0.5rem 0.7rem 0.8rem;
-    overflow-x: auto;
-    border-top: 1px solid rgba(15, 23, 42, 0.9);
-}
-
-.vehicle-modal-gallery-image {
-    width: 76px;
-    height: 56px;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(31, 41, 55, 0.9);
-    cursor: pointer;
-    flex: 0 0 auto;
-    background: #020617;
-    transition:
-        border-color var(--transition-fast),
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast),
-        opacity var(--transition-fast);
-    opacity: 0.9;
-}
-
-.vehicle-modal-gallery-image:hover {
-    border-color: var(--accent);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.75);
-    opacity: 1;
-}
-
-/* Rechte Seite: Inhalt */
-.vehicle-modal-body {
-    padding: 1.2rem 1.35rem 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-}
-
-.vehicle-modal-title {
-    margin: 0.2rem 0 0.25rem;
-    font-size: 1.35rem;
-    font-weight: 700;
-}
-
-.vehicle-modal-price {
-    margin: 0;
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 1.02rem;
-}
-
-.vehicle-modal-description {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
-}
-
-/* Spezifikationen */
-.vehicle-specs-list {
-    margin: 0.6rem 0 0;
-    padding: 0.7rem 0.8rem;
-    border-radius: var(--radius-md);
-    border: 1px dashed var(--border-subtle);
-    background:
-        radial-gradient(700px 400px at 0 0, rgba(255, 153, 0, 0.1), transparent 70%),
-        rgba(15, 23, 42, 0.9);
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    column-gap: 1.1rem;
-    row-gap: 0.15rem;
-    font-size: 0.9rem;
-}
-
-.vehicle-spec-label {
-    margin: 0;
-    color: var(--text-soft);
-    font-weight: 500;
-}
-
-.vehicle-spec-value {
-    margin: 0;
-    color: var(--text);
-}
-
-/* Upgrades */
-.vehicle-upgrades {
-    margin-top: 0.9rem;
-}
-
-.vehicle-upgrades-title {
-    margin: 0 0 0.4rem;
-    font-size: 0.98rem;
-    font-weight: 600;
-}
-
-.vehicle-upgrades-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.vehicle-upgrades-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.45rem 0.65rem;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(31, 41, 55, 0.85);
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.92));
-}
-
-.vehicle-upgrade-name {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.vehicle-upgrade-price {
-    font-size: 0.9rem;
-    color: var(--accent);
-    font-weight: 600;
-}
-
-/* ================================
-   Scrollbars & Fokus
-================================ */
-
-.vehicle-modal-gallery::-webkit-scrollbar {
-    height: 6px;
-}
-.vehicle-modal-gallery::-webkit-scrollbar-track {
-    background: transparent;
-}
-.vehicle-modal-gallery::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.7);
-    border-radius: 999px;
-}
-.vehicle-modal-gallery::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 153, 0, 0.8);
-}
-
-/* Tastatur-Fokus */
-.vehicle-card:focus-visible,
-.vehicle-modal-close:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
-
-/* --------------------------------------------------------
-   Gruppe-Navigation (über den Fahrzeuggruppen)
-   Buttons im Orange-Darkmode-Stil (#ff9900)
---------------------------------------------------------- */
+/* ========================================================================
+   STICKY GROUP NAVIGATION
+   ======================================================================== */
 
 .vehicle-group-nav {
+    position: sticky;
+    top: 72px;
+    z-index: 30;
+
     display: flex;
     gap: 0.7rem;
     flex-wrap: wrap;
+
     margin: 1.5rem 0 2rem;
     padding: 0.8rem 1rem;
-    border-radius: 14px;
-    background: rgba(255, 153, 0, 0.05);
-    border: 1px solid rgba(255, 153, 0, 0.12);
-    backdrop-filter: blur(4px);
+    border-radius: var(--radius);
+
+    background: rgba(12,14,17,0.96);
+    border: 1px solid rgba(255,153,0,0.18);
+    backdrop-filter: blur(6px);
+    box-shadow: var(--shadow);
 }
 
 /* Buttons */
@@ -652,31 +133,260 @@ body.catalog-body::after {
     padding: 0.55rem 1.2rem;
     font-size: 0.95rem;
     border-radius: 999px;
+
     border: 1px solid rgba(255, 153, 0, 0.35);
     background: rgba(255, 153, 0, 0.12);
-    color: #ff9900;
+    color: var(--bt-orange);
+
     font-weight: 600;
     letter-spacing: 0.03em;
-    transition: 
+    text-transform: uppercase;
+
+    transition:
         background 0.2s ease,
         border-color 0.2s ease,
         box-shadow 0.2s ease,
-        transform 0.15s ease;
+        transform 0.15s ease,
+        color 0.2s ease;
 }
 
-/* Hover-Effekt */
 .group-nav-btn:hover {
-    background: rgba(255, 153, 0, 0.22);
-    border-color: rgba(255, 153, 0, 0.65);
-    box-shadow: 0 0 12px rgba(255, 153, 0, 0.25);
+    background: rgba(255, 153, 0, 0.24);
+    border-color: rgba(255, 153, 0, 0.75);
+    box-shadow: 0 0 14px rgba(255, 153, 0, 0.35);
     transform: translateY(-1px);
 }
 
-/* Aktiver Zustand (falls später genutzt) */
 .group-nav-btn.active {
-    background: #ff9900;
+    background: var(--bt-orange);
     color: #111;
-    border-color: #ff9900;
-    box-shadow: 0 0 18px rgba(255, 153, 0, 0.35);
+    border-color: var(--bt-orange);
+    box-shadow: 0 0 20px rgba(255, 153, 0, 0.45);
 }
 
+/* ========================================================================
+   VEHICLE GROUPS
+   ======================================================================== */
+
+.vehicle-group {
+    margin-bottom: 3.5rem;
+}
+
+.vehicle-group-title {
+    font-size: 1.75rem;
+    margin: 0 0 1rem;
+    color: var(--bt-orange);
+    text-shadow: 0 0 6px rgba(255,153,0,0.4);
+}
+
+.vehicle-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 1.4rem;
+}
+
+/* ========================================================================
+   VEHICLE CARDS
+   ======================================================================== */
+
+.vehicle-card {
+    background: var(--bt-bg-light);
+    border: 1px solid var(--bt-border);
+    border-radius: var(--radius);
+
+    overflow: hidden;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--bt-orange);
+    box-shadow: 0 14px 28px rgba(255,153,0,0.25);
+}
+
+.vehicle-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #000;
+}
+
+.vehicle-card-meta {
+    padding: 0.9rem 1rem;
+}
+
+.vehicle-card-name {
+    margin: 0 0 0.3rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bt-text);
+}
+
+.vehicle-card-price {
+    margin: 0.1rem 0 0.3rem;
+    color: var(--bt-orange);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.vehicle-card-speed {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--bt-text-dim);
+}
+
+/* ========================================================================
+   MODAL OVERLAY
+   ======================================================================== */
+
+.vehicle-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+}
+
+.vehicle-overlay-open {
+    display: block;
+}
+
+.vehicle-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(3px);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* ========================================================================
+   MODAL WINDOW
+   ======================================================================== */
+
+.vehicle-modal {
+    position: relative;
+    z-index: 10;
+
+    max-width: 1140px;
+    width: 94vw;
+    margin: 5vh auto;
+    background: var(--bt-bg-light);
+    border: 1px solid var(--bt-border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.2rem 1.4rem;
+}
+
+.vehicle-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    background: rgba(255,153,0,0.12);
+    color: var(--bt-orange);
+    border: 1px solid rgba(255,153,0,0.35);
+    font-size: 1.4rem;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
+
+.vehicle-modal-close:hover {
+    background: var(--bt-orange);
+    color: #111;
+    border-color: var(--bt-orange);
+    transform: scale(1.1);
+}
+
+/* ========================================================================
+   MODAL LAYOUT
+   ======================================================================== */
+
+.vehicle-modal-layout {
+    display: flex;
+    gap: 1.2rem;
+}
+
+@media (max-width: 900px) {
+    .vehicle-modal-layout {
+        flex-direction: column;
+    }
+}
+
+.vehicle-modal-media {
+    flex: 0 0 48%;
+}
+
+.vehicle-modal-image-main {
+    width: 100%;
+    height: 380px;
+    object-fit: contain;
+    border-radius: var(--radius);
+    background: #000;
+}
+
+/* GALLERY */
+.vehicle-modal-gallery {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.vehicle-modal-gallery-image {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    cursor: pointer;
+
+    border: 1px solid rgba(255,153,0,0.25);
+    background: #000;
+
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.vehicle-modal-gallery-image:hover {
+    box-shadow: 0 0 12px rgba(255,153,0,0.35);
+    transform: scale(1.05);
+}
+
+.vehicle-modal-body {
+    flex: 1;
+}
+
+/* ========================================================================
+   MODAL TEXT + SPECS
+   ======================================================================== */
+
+.vehicle-modal-title {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--bt-orange);
+}
+
+.vehicle-modal-price {
+    margin: 0.4rem 0 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--bt-orange);
+}
+
+.vehicle-modal-description {
+    margin-bottom: 1.2rem;
+    color: var(--bt-text-dim
