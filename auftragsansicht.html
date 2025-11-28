@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Auftragsübersicht</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="katalog.css">
+
+    <style>
+        .orders-table-card {
+            margin-top: 1.6rem;
+            padding: 1.2rem 1.3rem;
+            border-radius: 18px;
+            border: 1px solid var(--border-subtle, #222633);
+            background:
+                radial-gradient(800px 450px at 0% 0%, rgba(255, 153, 0, 0.08), transparent 65%),
+                rgba(10, 12, 20, 0.96);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .orders-status {
+            margin-bottom: 0.7rem;
+            font-size: 0.9rem;
+            color: var(--text-muted, #9ca3af);
+            min-height: 1.2em;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .orders-table thead {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 0.5rem 0.55rem;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+        }
+
+        .orders-table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted, #9ca3af);
+            white-space: nowrap;
+        }
+
+        .orders-table tbody tr:hover {
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        .orders-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(75, 85, 99, 0.9);
+            font-size: 0.78rem;
+        }
+
+        .orders-pill-open {
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .orders-pill-done {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .orders-pager {
+            margin-top: 0.7rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted, #9ca3af);
+        }
+    </style>
+</head>
+<body class="catalog-body">
+<div class="catalog-page">
+
+    <header class="catalog-header">
+        <div class="catalog-header-brand">
+            <h1 class="catalog-title">Auftragsübersicht</h1>
+            <p class="catalog-subtitle">Alle eingegangenen Bestellungen (nur Leseansicht)</p>
+        </div>
+    </header>
+
+    <section class="orders-table-card">
+        <div id="ordersStatus" class="orders-status">🔄 Lade Aufträge …</div>
+
+        <div class="orders-table-wrapper">
+            <table class="orders-table" id="ordersTable">
+                <thead>
+                <tr>
+                    <th>Auftrags-ID</th>
+                    <th>Eingang</th>
+                    <th>Kunde</th>
+                    <th>Kontakt</th>
+                    <th>Fahrzeuge</th>
+                    <th>Status</th>
+                    <th>Abgeschlossen</th>
+                </tr>
+                </thead>
+                <tbody id="ordersBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="catalog-footer">
+        <p class="catalog-footer-text">
+            © <span id="ordersYear"></span> Fahrzeug-Shop
+        </p>
+    </footer>
+</div>
+
+<script>
+(function(){
+    const APP_SCRIPT_URL = "https://script.google.com/macros/s/DEINE_WEB_APP_URL/exec"; // TODO anpassen
+
+    const yearEl       = document.getElementById("ordersYear");
+    const statusEl     = document.getElementById("ordersStatus");
+    const tbody        = document.getElementById("ordersBody");
+
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+    function renderOrders(list){
+        tbody.innerHTML = "";
+        if(!list || !list.length){
+            statusEl.textContent = "Keine Aufträge gefunden.";
+            return;
+        }
+        statusEl.textContent = "Insgesamt " + list.length + " Auftrag/⸱e geladen.";
+
+        list.forEach(order => {
+            const tr = document.createElement("tr");
+
+            const tdId    = document.createElement("td");
+            const tdTime  = document.createElement("td");
+            const tdCust  = document.createElement("td");
+            const tdCont  = document.createElement("td");
+            const tdItems = document.createElement("td");
+            const tdStat  = document.createElement("td");
+            const tdDone  = document.createElement("td");
+
+            tdId.textContent   = order.id || "";
+            tdTime.textContent = order.createdAt || "";
+            tdCust.textContent = order.customerName || "";
+            tdCont.textContent = order.customerContact || "";
+
+            tdItems.textContent = order.itemsSummary || "";
+
+            const statSpan = document.createElement("span");
+            statSpan.className = "orders-pill";
+            const statusText = order.status || "offen";
+            statSpan.textContent = statusText;
+            tdStat.appendChild(statSpan);
+
+            const doneSpan = document.createElement("span");
+            doneSpan.className = "orders-pill " + (order.completed ? "orders-pill-done" : "orders-pill-open");
+            doneSpan.textContent = order.completed ? "Ja" : "Nein";
+            tdDone.appendChild(doneSpan);
+
+            tr.appendChild(tdId);
+            tr.appendChild(tdTime);
+            tr.appendChild(tdCust);
+            tr.appendChild(tdCont);
+            tr.appendChild(tdItems);
+            tr.appendChild(tdStat);
+            tr.appendChild(tdDone);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function loadOrders(){
+        try{
+            statusEl.textContent = "🔄 Lade Aufträge …";
+            const res = await fetch(APP_SCRIPT_URL + "?action=listOrders");
+            const data = await res.json();
+            if(data.status !== "ok"){
+                throw new Error(data.message || "Unbekannter Fehler");
+            }
+            renderOrders(data.orders || []);
+        }catch(err){
+            console.error(err);
+            statusEl.textContent = "❌ Fehler beim Laden der Aufträge: " + err.message;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadOrders);
+})();
+</script>
+</body>
+</html>
