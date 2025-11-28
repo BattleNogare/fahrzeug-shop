@@ -5,26 +5,53 @@
     <title>Fahrzeugkatalog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Dein eigenes Design in externer CSS -->
+    <!-- Favicon aus eigener Datei -->
+    <link rel="icon" type="image/x-icon" href="bilder/favicon.ico">
+
+    <!-- Darkmode / Theme -->
     <link rel="stylesheet" href="katalog.css">
 
-    <!-- YAML-Parser (js-yaml) von CDN -->
+    <!-- YAML-Parser (js-yaml) -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+
+    <script>
+        // Einfacher Include-Loader für Navbar / Footer
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("[data-include]").forEach(function (el) {
+                const file = el.getAttribute("data-include");
+                if (!file) return;
+
+                fetch(file)
+                    .then(function (response) {
+                        if (!response.ok) throw new Error("Include konnte nicht geladen werden: " + file);
+                        return response.text();
+                    })
+                    .then(function (html) {
+                        el.innerHTML = html;
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                    });
+            });
+        });
+    </script>
 </head>
 <body class="catalog-body">
 
+<!-- NAVBAR wird automatisch aus externer Datei geladen -->
+<header class="site-navbar" data-include="custom.d/navbar.html"></header>
+
 <div class="catalog-page">
 
-    <!-- Kopfbereich -->
+    <!-- Seitenkopf -->
     <header class="catalog-header">
         <div class="catalog-header-brand">
             <h1 class="catalog-title">Fahrzeugkatalog</h1>
             <p class="catalog-subtitle">Übersicht aller verfügbaren Fahrzeuge</p>
         </div>
 
-        <!-- Optional: später Filter / Suche einbauen -->
         <div class="catalog-header-actions" id="catalogHeaderActions">
-            <!-- z.B. Filter nach Typ, Kraftstoff, Preis etc. -->
+            <!-- z.B. spätere Filter / Suche -->
         </div>
     </header>
 
@@ -35,20 +62,22 @@
         </div>
     </section>
 
+    <!-- NEU: Typ-Navigation (wird per JS gefüllt) -->
+    <nav id="groupNav" class="vehicle-group-nav"></nav>
+
     <!-- Fahrzeug-Gruppen -->
     <main class="catalog-main">
         <section class="catalog-grid-section">
             <div id="vehicleGrid" class="vehicle-grid">
-                <!-- Hier werden gruppierte Fahrzeugkarten per JS eingefügt -->
+                <!-- Fahrzeug-Gruppen und Karten werden per JS eingefügt -->
             </div>
         </section>
     </main>
 
-    <!-- Fußbereich (optional befüllbar) -->
-    <footer class="catalog-footer">
-        <p class="catalog-footer-text">© <span id="catalogYear"></span> Fahrzeug-Shop</p>
-    </footer>
 </div>
+
+<!-- FOOTER wird automatisch aus externer Datei geladen -->
+<footer class="site-footer" data-include="custom.d/footer.html"></footer>
 
 <!-- Overlay / Modal für Fahrzeugdetails -->
 <div id="vehicleOverlay" class="vehicle-overlay" aria-hidden="true">
@@ -93,6 +122,7 @@
 
     const hintBox               = document.getElementById("hintBox");
     const gridEl                = document.getElementById("vehicleGrid");
+    const groupNavEl            = document.getElementById("groupNav");
     const overlay               = document.getElementById("vehicleOverlay");
     const modalImgMain          = document.getElementById("vehicleModalImgMain");
     const modalGallery          = document.getElementById("vehicleModalGallery");
@@ -101,14 +131,8 @@
     const modalDescription      = document.getElementById("vehicleModalDescription");
     const modalSpecs            = document.getElementById("vehicleModalSpecs");
     const modalUpgrades         = document.getElementById("vehicleModalUpgrades");
-    const yearEl                = document.getElementById("catalogYear");
 
     let vehicles = [];
-
-    // Jahr im Footer
-    if(yearEl){
-        yearEl.textContent = new Date().getFullYear();
-    }
 
     /* ===== Helper ===== */
 
@@ -124,7 +148,6 @@
         let norm = s;
 
         if(lastComma > lastDot){
-            // Komma als Dezimaltrennzeichen
             norm = s.replace(/\./g,"").replace(",",".");
         }else{
             norm = s.replace(/,/g,"");
@@ -146,7 +169,6 @@
         return [dt, dd];
     }
 
-    // id_nr sinnvoll in Zahl umwandeln (für Sortierung)
     function parseIdNr(raw){
         const maybe =
             raw.id_nr   ?? raw["id-nr"] ??
@@ -164,15 +186,10 @@
 
         const v = {};
 
-        // ID: kann eine String-ID sein (für interne Zuordnung)
         v.id                    = raw.id || raw.ID || null;
-        // id_nr: Nummer für Sortierung innerhalb des Typs (MUSS in YAML vorhanden sein)
         v.idNr                  = parseIdNr(raw);
-
-        // Typ: MUSS in YAML vorhanden sein
         v.typ                   = raw.typ || raw.Typ || raw.type || raw.Type || "Sonstige";
 
-        // Basisdaten
         v.name                  = raw.name || raw.Name || "";
         v.beschreibung          = raw.beschreibung || raw.Beschreibung || "";
         v.bild1                 = raw.bild1 || raw.Bild1 || raw.bild || raw.Bild || "";
@@ -186,7 +203,6 @@
         v.kraftstoffart         = raw.kraftstoffart || raw.Kraftstoffart;
         v.neupreis              = raw.neupreis || raw.Neupreis;
 
-        // Extra-Bilder
         if(Array.isArray(raw.bilder_extra)){
             v.bilder_extra = raw.bilder_extra.slice();
         }else{
@@ -197,14 +213,12 @@
             if(extras.length) v.bilder_extra = extras;
         }
 
-        // Upgrades – moderne Struktur: "upgrades: [{name, preis}, ...]"
         if(Array.isArray(raw.upgrades)){
             v.upgrades = raw.upgrades.map(u => ({
                 name: u.name || u.titel || "Upgrade",
                 preis: u.preis || u.Preis || null
             }));
         }else{
-            // Rückwärts-kompatibel zu Upgradepreis1-x (falls du sowas irgendwann noch verwendest)
             const ups = [];
             if(raw.Upgradepreis1 || raw.upgradepreis1){
                 ups.push({name: raw.Upgrade1Name || raw.upgrade1Name || "Upgrade 1", preis: raw.Upgradepreis1 || raw.upgradepreis1});
@@ -220,8 +234,6 @@
 
         return v;
     }
-
-    /* ===== Karten-Erzeugung ===== */
 
     function buildVehicleCard(v){
         const card = document.createElement("article");
@@ -261,6 +273,50 @@
         return card;
     }
 
+    /* ===== Slug für Typ-IDs ===== */
+
+    function slugForType(typeName){
+        return "gruppe-" + String(typeName)
+            .toLowerCase()
+            .normalize("NFKD")
+            .replace(/[\u0300-\u036f]/g, "")      // Akzente weg
+            .replace(/[^a-z0-9]+/g, "-")          // alles andere zu -
+            .replace(/^-+|-+$/g, "") || "gruppe-sonstige";
+    }
+
+    /* ===== Typ-Navigation rendern ===== */
+
+    function renderGroupNav(navItems){
+        if(!groupNavEl) return;
+
+        groupNavEl.innerHTML = "";
+        if(!navItems.length){
+            groupNavEl.style.display = "none";
+            return;
+        }
+        groupNavEl.style.display = "";
+
+        navItems.forEach(item => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "group-nav-btn";
+            btn.textContent = item.typeName;
+
+            btn.addEventListener("click", () => {
+                const target = document.getElementById(item.slug);
+                if(!target) return;
+                const rect = target.getBoundingClientRect();
+                const offset = window.scrollY + rect.top - 90; // 90px Puffer für Navbar
+                window.scrollTo({
+                    top: offset,
+                    behavior: "smooth"
+                });
+            });
+
+            groupNavEl.appendChild(btn);
+        });
+    }
+
     /* ===== Modal ===== */
 
     function openModalByVehicle(v){
@@ -274,7 +330,6 @@
         modalPrice.textContent       = v.neupreis ? "Neupreis: " + euro(v.neupreis) : "";
         modalDescription.textContent = v.beschreibung || "";
 
-        // Bilder
         const images = [];
         if(v.bild1) images.push(v.bild1);
         if(v.bild2) images.push(v.bild2);
@@ -298,7 +353,6 @@
             });
         }
 
-        // Spezifikationen
         modalSpecs.innerHTML = "";
         const specs = [
             ["Höchstgeschwindigkeit", v.hoechstgeschwindigkeit ? v.hoechstgeschwindigkeit + " km/h" : ""],
@@ -318,7 +372,6 @@
             }
         });
 
-        // Upgrades
         modalUpgrades.innerHTML = "";
         if(Array.isArray(v.upgrades) && v.upgrades.length){
             const title = document.createElement("h3");
@@ -387,7 +440,6 @@
             hintBox.style.display = "none";
         }
 
-        // Gruppen: Map<Typ, Fahrzeug[]>
         const groups = new Map();
         vehicles.forEach(v => {
             const t = v.typ || "Sonstige";
@@ -397,24 +449,28 @@
             groups.get(t).push(v);
         });
 
-        // Typ-Namen sortieren (alphabetisch, deutsch)
         const sortedTypes = Array.from(groups.keys()).sort((a,b) =>
             a.localeCompare(b, "de", { sensitivity: "base" })
         );
 
+        const navItems = [];
+
         sortedTypes.forEach(typeName => {
             const groupVehicles = groups.get(typeName) || [];
 
-            // Innerhalb der Gruppe nach id_nr aufsteigend sortieren
+            // Sortierung nach id_nr
             groupVehicles.sort((a,b) => {
                 const aNr = (a.idNr !== undefined && a.idNr !== null) ? a.idNr : Number.POSITIVE_INFINITY;
                 const bNr = (b.idNr !== undefined && b.idNr !== null) ? b.idNr : Number.POSITIVE_INFINITY;
                 return aNr - bNr;
             });
 
-            // Gruppen-Wrapper
+            const slug = slugForType(typeName);
+            navItems.push({ typeName, slug });
+
             const groupEl = document.createElement("section");
             groupEl.className = "vehicle-group";
+            groupEl.id = slug;
 
             const heading = document.createElement("h2");
             heading.className = "vehicle-group-title";
@@ -432,9 +488,9 @@
             groupEl.appendChild(groupGrid);
             gridEl.appendChild(groupEl);
         });
-    }
 
-    /* ===== Initiales Laden ===== */
+        renderGroupNav(navItems);
+    }
 
     async function init(){
         try{
