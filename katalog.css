@@ -31,7 +31,7 @@
 }
 
 /* ================================
-   Grundlayout
+   Global
 ================================ */
 
 *,
@@ -49,22 +49,86 @@ body.catalog-body {
     margin: 0;
     padding: 0;
     font-family: var(--font-main);
-    background: radial-gradient(1200px 600px at 10% -20%, #ff990011, transparent 70%),
-                radial-gradient(900px 600px at 110% 120%, #ff990008, transparent 65%),
-                var(--bg-page);
     color: var(--text);
+    background: var(--bg-page);
     -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* Wenn Overlay offen → Scrollen verhindern */
+/* Overlay offen → Scroll sperren */
 body.catalog-has-overlay {
     overflow: hidden;
 }
+
+/* ================================
+   Animierter Hintergrund
+================================ */
+
+body.catalog-body::before {
+    content: "";
+    position: fixed;
+    inset: -40%;
+    z-index: -1;
+    background:
+        radial-gradient(900px 600px at 0% 0%, rgba(255, 153, 0, 0.26), transparent 65%),
+        radial-gradient(900px 600px at 100% 100%, rgba(255, 153, 0, 0.16), transparent 65%),
+        radial-gradient(700px 400px at 50% 120%, rgba(15, 23, 42, 0.9), rgba(3, 7, 18, 1));
+    opacity: 0.9;
+    animation: bgGlowMove 32s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes bgGlowMove {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: hue-rotate(0deg) saturate(1.05);
+    }
+    25% {
+        transform: translate3d(-3%, -2%, 0) scale(1.03);
+        filter: hue-rotate(8deg) saturate(1.1);
+    }
+    50% {
+        transform: translate3d(3%, 2%, 0) scale(1.04);
+        filter: hue-rotate(-6deg) saturate(1.05);
+    }
+    75% {
+        transform: translate3d(-2%, 3%, 0) scale(1.02);
+        filter: hue-rotate(4deg) saturate(1.08);
+    }
+    100% {
+        transform: translate3d(2%, -3%, 0) scale(1.05);
+        filter: hue-rotate(-4deg) saturate(1.1);
+    }
+}
+
+/* Dezenter Overlay-Noise (optional, für mehr "Depth") */
+body.catalog-body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.8) 1px, transparent 0);
+    background-size: 4px 4px;
+    opacity: 0.16;
+    pointer-events: none;
+}
+
+/* ================================
+   Page Layout
+================================ */
 
 .catalog-page {
     max-width: 1240px;
     margin: 0 auto;
     padding: 2.2rem 1.3rem 2rem;
+}
+
+@media (max-width: 640px) {
+    .catalog-page {
+        padding-inline: 0.9rem;
+    }
 }
 
 /* ================================
@@ -95,8 +159,8 @@ body.catalog-has-overlay {
 
 .catalog-title {
     margin: 0;
-    font-size: clamp(1.5rem, 3vw, 2.1rem);
-    letter-spacing: 0.05em;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     font-weight: 700;
 }
@@ -115,9 +179,9 @@ body.catalog-has-overlay {
     justify-content: flex-end;
 }
 
-/* Platzhalter für spätere Filter/Buttons */
 .catalog-header-actions > * {
     color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
 /* ================================
@@ -144,11 +208,11 @@ body.catalog-has-overlay {
     color: #fecaca;
     background:
         radial-gradient(650px 350px at 10% -10%, rgba(248, 113, 113, 0.18), transparent 60%),
-        linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+        linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98));
 }
 
 /* ================================
-   Main + Grid
+   Main / Gruppen
 ================================ */
 
 .catalog-main {
@@ -159,23 +223,48 @@ body.catalog-has-overlay {
     padding: 0;
 }
 
+/* vehicle-grid enthält jetzt Gruppen */
 .vehicle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+}
+
+/* Gruppe nach Typ */
+.vehicle-group {
+    padding: 1.1rem 1.15rem 1.0rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(31, 41, 55, 0.85);
+    background:
+        radial-gradient(800px 450px at 0% 0%, rgba(255, 153, 0, 0.12), transparent 65%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(10, 16, 30, 0.96));
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+}
+
+.vehicle-group-title {
+    margin: 0 0 0.7rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* Grid innerhalb einer Gruppe */
+.vehicle-group-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.1rem;
+    gap: 1.0rem;
 }
 
 @media (max-width: 980px) {
-    .vehicle-grid {
+    .vehicle-group-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 640px) {
-    .catalog-page {
-        padding-inline: 0.9rem;
-    }
-    .vehicle-grid {
+    .vehicle-group-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 }
@@ -370,8 +459,9 @@ body.catalog-has-overlay {
 
 /* Linke Seite: Bilder */
 .vehicle-modal-media {
-    background: radial-gradient(900px 600px at 10% 0, rgba(255, 153, 0, 0.25), transparent 65%),
-                linear-gradient(180deg, #020617, #020617);
+    background:
+        radial-gradient(900px 600px at 10% 0, rgba(255, 153, 0, 0.25), transparent 65%),
+        linear-gradient(180deg, #020617, #020617);
     border-right: 1px solid rgba(15, 23, 42, 0.9);
     display: flex;
     flex-direction: column;
@@ -451,90 +541,11 @@ body.catalog-has-overlay {
     padding: 0.7rem 0.8rem;
     border-radius: var(--radius-md);
     border: 1px dashed var(--border-subtle);
-    background: radial-gradient(700px 400px at 0 0, rgba(255, 153, 0, 0.1), transparent 70%),
-                rgba(15, 23, 42, 0.9);
+    background:
+        radial-gradient(700px 400px at 0 0, rgba(255, 153, 0, 0.1), transparent 70%),
+        rgba(15, 23, 42, 0.9);
     display: grid;
     grid-template-columns: max-content 1fr;
     column-gap: 1.1rem;
     row-gap: 0.15rem;
-    font-size: 0.9rem;
-}
-
-.vehicle-spec-label {
-    margin: 0;
-    color: var(--text-soft);
-    font-weight: 500;
-}
-
-.vehicle-spec-value {
-    margin: 0;
-    color: var(--text);
-}
-
-/* Upgrades */
-.vehicle-upgrades {
-    margin-top: 0.9rem;
-}
-
-.vehicle-upgrades-title {
-    margin: 0 0 0.4rem;
-    font-size: 0.98rem;
-    font-weight: 600;
-}
-
-.vehicle-upgrades-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.vehicle-upgrades-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.45rem 0.65rem;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(31, 41, 55, 0.85);
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.92));
-}
-
-.vehicle-upgrade-name {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.vehicle-upgrade-price {
-    font-size: 0.9rem;
-    color: var(--accent);
-    font-weight: 600;
-}
-
-/* ================================
-   Kleine Extras
-================================ */
-
-/* Scrollbar (optional, nur WebKit) */
-.vehicle-modal-gallery::-webkit-scrollbar {
-    height: 6px;
-}
-.vehicle-modal-gallery::-webkit-scrollbar-track {
-    background: transparent;
-}
-.vehicle-modal-gallery::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.7);
-    border-radius: 999px;
-}
-.vehicle-modal-gallery::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 153, 0, 0.8);
-}
-
-/* Fokusränder (für Tastatur-Nutzung) */
-.vehicle-card:focus-visible,
-.vehicle-modal-close:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
+    f
