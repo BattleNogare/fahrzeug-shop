@@ -389,4 +389,73 @@ body.catalog-body {
 
 .vehicle-modal-description {
     margin-bottom: 1.2rem;
-    color: var(--bt-text-dim
+    color: var(--bt-text-dim);
+    line-height: 1.5;
+}
+
+.vehicle-specs-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4rem 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.vehicle-spec-label {
+    color: var(--bt-text);
+    opacity: 0.8;
+}
+
+.vehicle-spec-value {
+    color: var(--bt-text);
+    font-weight: 600;
+}
+
+/* ========================================================================
+   UPGRADES LIST
+   ======================================================================== */
+
+.vehicle-upgrades-title {
+    font-size: 1.2rem;
+    color: var(--bt-orange);
+    margin: 0 0 0.5rem;
+}
+
+.vehicle-upgrades-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.vehicle-upgrades-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.45rem 0.4rem;
+    border-bottom: 1px solid var(--bt-border);
+    color: var(--bt-text);
+}
+
+.vehicle-upgrade-price {
+    color: var(--bt-orange);
+    font-weight: 600;
+}
+
+/* ========================================================================
+   SCROLL BAR (Optional)
+   ======================================================================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bt-bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bt-orange-dim);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bt-orange);
+}
