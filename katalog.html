@@ -8,8 +8,8 @@
     <!-- Favicon aus eigener Datei -->
     <link rel="icon" type="image/x-icon" href="bilder/favicon.ico">
 
-    <!-- Darkmode / Theme --> 
-    <link rel="stylesheet" href="katalog.css"> 
+    <!-- Darkmode / Theme -->
+    <link rel="stylesheet" href="katalog.css">
 
     <!-- YAML-Parser (js-yaml) -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
@@ -62,7 +62,7 @@
         </div>
     </section>
 
-    <!-- NEU: Typ-Navigation (wird per JS gefüllt) -->
+    <!-- Typ-Navigation (wird per JS gefüllt) -->
     <nav id="groupNav" class="vehicle-group-nav"></nav>
 
     <!-- Fahrzeug-Gruppen -->
@@ -148,7 +148,7 @@
         let norm = s;
 
         if(lastComma > lastDot){
-            norm = s.replace(/\./g,"").replace(",",".");
+            norm = s.replace(/\./g,"").replace(","," .");
         }else{
             norm = s.replace(/,/g,"");
         }
