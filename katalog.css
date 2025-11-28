@@ -1,5 +1,5 @@
 /* ========================================================================
-   GLOBAL DARK THEME — BraunTech Style
+   GLOBAL DARK THEME
    Theme-Farbe: #ff9900 (Orange)
    ======================================================================== */
 
@@ -49,6 +49,127 @@ body.catalog-body {
 }
 
 /* ========================================================================
+   GENERISCHE CONTAINER
+   ======================================================================== */
+
+.bt-container {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ========================================================================
+   NAVBAR (bt-header, bt-nav, etc.)
+   ======================================================================== */
+
+.bt-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6, 8, 12, 0.98);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.bt-header-inner {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.bt-logo img {
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
+/* Navigation */
+
+.bt-nav {
+    display: flex;
+    align-items: center;
+}
+
+.bt-nav-list {
+    list-style: none;
+    display: flex;
+    gap: 1.3rem;
+    margin: 0;
+    padding: 0;
+}
+
+.bt-nav-item {
+    position: relative;
+}
+
+.bt-nav-link {
+    color: var(--bt-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.3rem 0.1rem;
+    border-bottom: 2px solid transparent;
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.bt-nav-link:hover {
+    color: var(--bt-orange);
+    border-bottom-color: var(--bt-orange);
+}
+
+/* Dropdown */
+
+.bt-has-dropdown:hover > .bt-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.bt-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0.4rem;
+
+    min-width: 220px;
+    padding: 0.35rem 0;
+
+    background: var(--bt-bg-light);
+    border-radius: 10px;
+    border: 1px solid var(--bt-border);
+
+    box-shadow: var(--shadow);
+
+    list-style: none;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+    z-index: 200;
+}
+
+.bt-dropdown-link {
+    display: block;
+    padding: 0.45rem 0.9rem;
+    color: var(--bt-text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.bt-dropdown-link:hover {
+    background: rgba(255,153,0,0.13);
+    color: var(--bt-orange);
+}
+
+/* ========================================================================
    PAGE WRAPPER
    ======================================================================== */
 
@@ -56,6 +177,7 @@ body.catalog-body {
     max-width: 1360px;
     margin: 0 auto;
     padding: 1.5rem;
+    padding-top: 1.6rem;
 }
 
 /* ========================================================================
@@ -63,7 +185,7 @@ body.catalog-body {
    ======================================================================== */
 
 .catalog-header {
-    margin-top: 1.2rem;
+    margin-top: 0.6rem;
     margin-bottom: 1.8rem;
     display: flex;
     flex-direction: column;
@@ -87,6 +209,10 @@ body.catalog-body {
    HINT BOX
    ======================================================================== */
 
+.catalog-hint-section {
+    margin-bottom: 0.5rem;
+}
+
 .catalog-hint {
     padding: 0.8rem 1rem;
     border: 1px solid var(--bt-border);
@@ -105,19 +231,19 @@ body.catalog-body {
 }
 
 /* ========================================================================
-   STICKY GROUP NAVIGATION
+   STICKY GROUP NAVIGATION (über Gruppen)
    ======================================================================== */
 
 .vehicle-group-nav {
     position: sticky;
-    top: 72px;
+    top: 72px; /* Offset unterhalb der Navbar */
     z-index: 30;
 
     display: flex;
     gap: 0.7rem;
     flex-wrap: wrap;
 
-    margin: 1.5rem 0 2rem;
+    margin: 1.3rem 0 2rem;
     padding: 0.8rem 1rem;
     border-radius: var(--radius);
 
@@ -437,6 +563,28 @@ body.catalog-body {
 .vehicle-upgrade-price {
     color: var(--bt-orange);
     font-weight: 600;
+}
+
+/* ========================================================================
+   FOOTER (site-footer)
+   ======================================================================== */
+
+.site-footer {
+    margin-top: 2.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bt-border);
+    color: var(--bt-text-dim);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.site-footer a {
+    color: var(--bt-orange);
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
 }
 
 /* ========================================================================
