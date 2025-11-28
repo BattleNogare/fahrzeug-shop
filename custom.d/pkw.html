@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>PKW – Fahrzeugkatalog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/x-icon" href="bilder/favicon.ico">
+    <link rel="stylesheet" href="katalog.css">
+
+    <!-- YAML-Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+
+    <script>
+        // Include-Loader für Navbar / Footer
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("[data-include]").forEach(function (el) {
+                const file = el.getAttribute("data-include");
+                if (!file) return;
+
+                fetch(file)
+                    .then(function (response) {
+                        if (!response.ok) throw new Error("Include konnte nicht geladen werden: " + file);
+                        return response.text();
+                    })
+                    .then(function (html) {
+                        el.innerHTML = html;
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                    });
+            });
+        });
+    </script>
+</head>
+<body class="catalog-body">
+
+<header class="bt-header" data-include="custom.d/navbar.html"></header>
+
+<div class="catalog-page">
+
+    <header class="catalog-header">
+        <div class="catalog-header-brand">
+            <h1 class="catalog-title">PKW</h1>
+            <p class="catalog-subtitle">Alle verfügbaren PKW-Modelle</p>
+        </div>
+    </header>
+
+    <section class="catalog-hint-section">
+        <div id="hintBox" class="catalog-hint">
+            🔄 Lade Fahrzeugdaten …
+        </div>
+    </section>
+
+    <main class="catalog-main">
+        <section class="catalog-grid-section">
+            <div id="vehicleGrid" class="vehicle-grid">
+                <!-- PKW-Karten per JS -->
+            </div>
+        </section>
+    </main>
+
+</div>
+
+<footer class="site-footer" data-include="custom.d/footer.html"></footer>
+
+<!-- Modal -->
+<div id="vehicleOverlay" class="vehicle-overlay" aria-hidden="true">
+    <div class="vehicle-overlay-backdrop" data-close-overlay></div>
+
+    <div class="vehicle-modal" role="dialog" aria-modal="true" aria-labelledby="vehicleModalTitle">
+        <button class="vehicle-modal-close" type="button" data-close-overlay aria-label="Schließen">
+            ×
+        </button>
+
+        <div class="vehicle-modal-layout">
+            <div class="vehicle-modal-media">
+                <img id="vehicleModalImgMain" class="vehicle-modal-image-main" src="" alt="">
+                <div id="vehicleModalGallery" class="vehicle-modal-gallery"></div>
+            </div>
+
+            <div class="vehicle-modal-body">
+                <h2 id="vehicleModalTitle" class="vehicle-modal-title"></h2>
+                <p id="vehicleModalPrice" class="vehicle-modal-price"></p>
+                <p id="vehicleModalDescription" class="vehicle-modal-description"></p>
+
+                <dl id="vehicleModalSpecs" class="vehicle-specs-list"></dl>
+
+                <div id="vehicleModalUpgrades" class="vehicle-upgrades"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const YAML_URL    = "fahrzeuge.yaml";
+    const FILTER_TYPE = "PKW";
+
+    const hintBox          = document.getElementById("hintBox");
+    const gridEl           = document.getElementById("vehicleGrid");
+    const overlay          = document.getElementById("vehicleOverlay");
+    const modalImgMain     = document.getElementById("vehicleModalImgMain");
+    const modalGallery     = document.getElementById("vehicleModalGallery");
+    const modalTitle       = document.getElementById("vehicleModalTitle");
+    const modalPrice       = document.getElementById("vehicleModalPrice");
+    const modalDescription = document.getElementById("vehicleModalDescription");
+    const modalSpecs       = document.getElementById("vehicleModalSpecs");
+    const modalUpgrades    = document.getElementById("vehicleModalUpgrades");
+
+    let vehicles = [];
+
+    function euro(value){
+        if(value === null || value === undefined || value === "") return "";
+        if(typeof value === "number"){
+            return value.toLocaleString("de-DE") + " €";
+        }
+        let s = String(value).trim().replace(/[^\d.,-]/g, "");
+        if(!s) return "";
+        const lastDot   = s.lastIndexOf(".");
+        const lastComma = s.lastIndexOf(",");
+        let norm = s;
+        if(lastComma > lastDot){
+            norm = s.replace(/\./g,"").replace(",",".");
+        }else{
+            norm = s.replace(/,/g,"");
+        }
+        const n = Number(norm);
+        return isFinite(n) ? n.toLocaleString("de-DE") + " €" : String(value);
+    }
+
+    function specRow(label, value){
+        if(!value && value !== 0) return null;
+        const dt = document.createElement("dt");
+        dt.className = "vehicle-spec-label";
+        dt.textContent = label;
+
+        const dd = document.createElement("dd");
+        dd.className = "vehicle-spec-value";
+        dd.textContent = value;
+
+        return [dt, dd];
+    }
+
+    function parseIdNr(raw){
+        const maybe =
+            raw.id_nr   ?? raw["id-nr"] ??
+            raw.idNr    ?? raw.IdNr    ??
+            raw["id nr"] ?? null;
+        const val = maybe !== null && maybe !== undefined ? maybe : null;
+        if(val === null) return Number.POSITIVE_INFINITY;
+        const n = Number(val);
+        return isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    }
+
+    function normalizeVehicle(raw){
+        if(!raw || typeof raw !== "object") return {};
+
+        const v = {};
+        v.id                    = raw.id || raw.ID || null;
+        v.idNr                  = parseIdNr(raw);
+        v.typ                   = raw.typ || raw.Typ || raw.type || raw.Type || "Sonstige";
+
+        v.name                  = raw.name || raw.Name || "";
+        v.beschreibung          = raw.beschreibung || raw.Beschreibung || "";
+        v.bild1                 = raw.bild1 || raw.Bild1 || raw.bild || raw.Bild || "";
+        v.bild2                 = raw.bild2 || raw.Bild2 || "";
+        v.hoechstgeschwindigkeit= raw.hoechstgeschwindigkeit || raw.Hoechstgeschwindigkeit || raw["Höchstgeschwindigkeit"];
+        v.leistung              = raw.leistung || raw.Leistung;
+        v.anzahl_sitze          = raw.anzahl_sitze || raw.Anzahl_Sitze || raw["Anzahl Sitze"];
+        v.kofferraumgroesse     = raw.kofferraumgroesse || raw.Kofferraumgroesse || raw["Kofferraumgröße"];
+        v.kofferraumtyp         = raw.kofferraumtyp || raw.Kofferraumtyp;
+        v.kraftstofftank        = raw.kraftstofftank || raw.Kraftstofftank;
+        v.kraftstoffart         = raw.kraftstoffart || raw.Kraftstoffart;
+        v.neupreis              = raw.neupreis || raw.Neupreis;
+
+        if(Array.isArray(raw.bilder_extra)){
+            v.bilder_extra = raw.bilder_extra.slice();
+        }else{
+            const extras = [];
+            if(raw.bild3 || raw.Bild3) extras.push(raw.bild3 || raw.Bild3);
+            if(raw.bild4 || raw.Bild4) extras.push(raw.bild4 || raw.Bild4);
+            if(raw.bild5 || raw.Bild5) extras.push(raw.bild5 || raw.Bild5);
+            if(extras.length) v.bilder_extra = extras;
+        }
+
+        if(Array.isArray(raw.upgrades)){
+            v.upgrades = raw.upgrades.map(u => ({
+                name: u.name || u.titel || "Upgrade",
+                preis: u.preis || u.Preis || null
+            }));
+        }else{
+            const ups = [];
+            if(raw.Upgradepreis1 || raw.upgradepreis1){
+                ups.push({name: raw.Upgrade1Name || raw.upgrade1Name || "Upgrade 1", preis: raw.Upgradepreis1 || raw.upgradepreis1});
+            }
+            if(raw.Upgradepreis2 || raw.upgradepreis2){
+                ups.push({name: raw.Upgrade2Name || raw.upgrade2Name || "Upgrade 2", preis: raw.Upgradepreis2 || raw.upgradepreis2});
+            }
+            if(raw.Upgradepreis3 || raw.upgradepreis3){
+                ups.push({name: raw.Upgrade3Name || raw.upgrade3Name || "Upgrade 3", preis: raw.Upgradepreis3 || raw.upgradepreis3});
+            }
+            if(ups.length) v.upgrades = ups;
+        }
+        return v;
+    }
+
+    function buildVehicleCard(v){
+        const card = document.createElement("article");
+        card.className = "vehicle-card";
+
+        const img = document.createElement("img");
+        img.className = "vehicle-card-image";
+        img.src = v.bild1 || v.bild2 || "";
+        img.alt = v.name || "Fahrzeug";
+
+        const meta = document.createElement("div");
+        meta.className = "vehicle-card-meta";
+
+        const nameEl = document.createElement("h2");
+        nameEl.className = "vehicle-card-name";
+        nameEl.textContent = v.name || "Unbenanntes Fahrzeug";
+
+        const priceEl = document.createElement("p");
+        priceEl.className = "vehicle-card-price";
+        priceEl.textContent = v.neupreis ? euro(v.neupreis) : "";
+
+        const speedEl = document.createElement("p");
+        speedEl.className = "vehicle-card-speed";
+        if(v.hoechstgeschwindigkeit){
+            speedEl.textContent = v.hoechstgeschwindigkeit + " km/h";
+        }
+
+        meta.appendChild(nameEl);
+        if(priceEl.textContent) meta.appendChild(priceEl);
+        if(speedEl.textContent) meta.appendChild(speedEl);
+
+        card.appendChild(img);
+        card.appendChild(meta);
+
+        card.addEventListener("click", () => openModalByVehicle(v));
+
+        return card;
+    }
+
+    function openModalByVehicle(v){
+        if(!v) return;
+
+        document.body.classList.add("catalog-has-overlay");
+        overlay.classList.add("vehicle-overlay-open");
+        overlay.setAttribute("aria-hidden", "false");
+
+        modalTitle.textContent       = v.name || "Fahrzeug";
+        modalPrice.textContent       = v.neupreis ? "Neupreis: " + euro(v.neupreis) : "";
+        modalDescription.textContent = v.beschreibung || "";
+
+        const images = [];
+        if(v.bild1) images.push(v.bild1);
+        if(v.bild2) images.push(v.bild2);
+        if(Array.isArray(v.bilder_extra)) images.push(...v.bilder_extra);
+
+        modalImgMain.src = images[0] || "";
+        modalImgMain.alt = v.name || "Fahrzeug";
+        modalGallery.innerHTML = "";
+
+        if(images.length > 1){
+            images.forEach((src, i) => {
+                if(i === 0) return;
+                const thumb = document.createElement("img");
+                thumb.className = "vehicle-modal-gallery-image";
+                thumb.src = src;
+                thumb.alt = v.name || "Fahrzeug";
+                thumb.addEventListener("click", () => {
+                    modalImgMain.src = src;
+                });
+                modalGallery.appendChild(thumb);
+            });
+        }
+
+        modalSpecs.innerHTML = "";
+        const specs = [
+            ["Höchstgeschwindigkeit", v.hoechstgeschwindigkeit ? v.hoechstgeschwindigkeit + " km/h" : ""],
+            ["Leistung",             v.leistung ? v.leistung + " PS" : ""],
+            ["Sitzplätze",           v.anzahl_sitze],
+            ["Kofferraumgröße",      v.kofferraumgroesse ? v.kofferraumgroesse + " l" : ""],
+            ["Kofferraumtyp",        v.kofferraumtyp],
+            ["Kraftstofftank",       v.kraftstofftank ? v.kraftstofftank + " l" : ""],
+            ["Kraftstoffart",        v.kraftstoffart]
+        ];
+        specs.forEach(([label, value]) => {
+            const row = specRow(label, value);
+            if(row){
+                modalSpecs.appendChild(row[0]);
+                modalSpecs.appendChild(row[1]);
+            }
+        });
+
+        modalUpgrades.innerHTML = "";
+        if(Array.isArray(v.upgrades) && v.upgrades.length){
+            const title = document.createElement("h3");
+            title.className = "vehicle-upgrades-title";
+            title.textContent = "Optionale Upgrades";
+
+            const list = document.createElement("ul");
+            list.className = "vehicle-upgrades-list";
+
+            v.upgrades.forEach(u => {
+                const li = document.createElement("li");
+                li.className = "vehicle-upgrades-item";
+
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "vehicle-upgrade-name";
+                nameSpan.textContent = u.name || "Upgrade";
+
+                const priceSpan = document.createElement("span");
+                priceSpan.className = "vehicle-upgrade-price";
+                if(u.preis !== null && u.preis !== undefined && u.preis !== ""){
+                    priceSpan.textContent = euro(u.preis);
+                }
+
+                li.appendChild(nameSpan);
+                if(priceSpan.textContent) li.appendChild(priceSpan);
+                list.appendChild(li);
+            });
+
+            modalUpgrades.appendChild(title);
+            modalUpgrades.appendChild(list);
+        }
+    }
+
+    function closeModal(){
+        document.body.classList.remove("catalog-has-overlay");
+        overlay.classList.remove("vehicle-overlay-open");
+        overlay.setAttribute("aria-hidden", "true");
+    }
+
+    overlay.addEventListener("click", (ev) => {
+        if(ev.target.dataset.closeOverlay !== undefined || ev.target === overlay){
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", (ev) => {
+        if(ev.key === "Escape" && overlay.classList.contains("vehicle-overlay-open")){
+            closeModal();
+        }
+    });
+
+    function renderVehicles(){
+        gridEl.innerHTML = "";
+
+        const filtered = vehicles
+            .filter(v => (v.typ || "") === FILTER_TYPE)
+            .sort((a,b) => {
+                const aNr = (a.idNr !== undefined && a.idNr !== null) ? a.idNr : Number.POSITIVE_INFINITY;
+                const bNr = (b.idNr !== undefined && b.idNr !== null) ? b.idNr : Number.POSITIVE_INFINITY;
+                return aNr - bNr;
+            });
+
+        if(!filtered.length){
+            if(hintBox){
+                hintBox.textContent = "Keine Fahrzeuge vom Typ \""+FILTER_TYPE+"\" gefunden.";
+                hintBox.classList.add("catalog-hint-error");
+            }
+            return;
+        }
+
+        if(hintBox){
+            hintBox.style.display = "none";
+        }
+
+        filtered.forEach(v => {
+            const card = buildVehicleCard(v);
+            gridEl.appendChild(card);
+        });
+    }
+
+    async function init(){
+        try{
+            const res = await fetch(YAML_URL);
+            if(!res.ok){
+                throw new Error("Konnte '" + YAML_URL + "' nicht laden (" + res.status + ").");
+            }
+            const text = await res.text();
+            const parsed = jsyaml.load(text);
+            const rawList = (parsed && (parsed.fahrzeuge || parsed.vehicles)) || [];
+
+            vehicles = rawList.map(normalizeVehicle).filter(v => v.name);
+
+            renderVehicles();
+        }catch(err){
+            console.error(err);
+            if(hintBox){
+                hintBox.textContent = "❌ Fehler beim Laden der Fahrzeugdaten: " + err.message;
+                hintBox.classList.add("catalog-hint-error");
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+
+</body>
+</html>
