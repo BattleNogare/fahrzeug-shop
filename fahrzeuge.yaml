@@ -23,13 +23,6 @@ fahrzeuge:
     kraftstofftank: 60     # Liter
     kraftstoffart: "Benzin"
     neupreis: 32990
-    upgrades:
-      - name: "Sportpaket"
-        preis: 2500
-      - name: "Technikpaket Pro"
-        preis: 3100
-      - name: "Panorama-Glasdach"
-        preis: 1800
 
   - id: bt_ranger_x
     name: "BraunTech Ranger X Offroad"
