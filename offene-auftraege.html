@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Offene Aufträge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="katalog.css">
+
+    <style>
+        .open-orders-card {
+            margin-top: 1.6rem;
+            padding: 1.2rem 1.3rem;
+            border-radius: 18px;
+            border: 1px solid var(--border-subtle, #222633);
+            background:
+                radial-gradient(800px 450px at 0% 0%, rgba(255, 153, 0, 0.08), transparent 65%),
+                rgba(10, 12, 20, 0.96);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .open-orders-status {
+            margin-bottom: 0.7rem;
+            font-size: 0.9rem;
+            color: var(--text-muted, #9ca3af);
+            min-height: 1.2em;
+        }
+
+        .open-orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .open-orders-table th,
+        .open-orders-table td {
+            padding: 0.45rem 0.55rem;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+            vertical-align: top;
+        }
+
+        .open-orders-table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted, #9ca3af);
+            white-space: nowrap;
+        }
+
+        .open-orders-table tbody tr:hover {
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        .open-orders-input,
+        .open-orders-select,
+        .open-orders-textarea {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle, #222633);
+            background: rgba(5, 7, 13, 0.95);
+            color: var(--text, #f5f5f5);
+            font: inherit;
+            padding: 0.25rem 0.4rem;
+            font-size: 0.86rem;
+        }
+        .open-orders-textarea {
+            min-height: 55px;
+            resize: vertical;
+        }
+
+        .open-orders-checkbox {
+            transform: translateY(2px);
+        }
+
+        .open-orders-save-btn {
+            border-radius: 999px;
+            border: 1px solid var(--border-subtle, #222633);
+            background: rgba(12, 14, 24, 0.96);
+            color: var(--text-muted, #9ca3af);
+            cursor: pointer;
+            font: inherit;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.85rem;
+            transition: transform 0.16s ease-out,
+                        box-shadow 0.16s ease-out,
+                        background 0.16s ease-out,
+                        color 0.16s ease-out,
+                        border-color 0.16s ease-out;
+        }
+
+        .open-orders-save-btn:hover {
+            background: var(--accent, #ff9900);
+            color: #000;
+            border-color: var(--accent, #ff9900);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.85);
+        }
+
+        .open-orders-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid #fbbf24;
+            color: #fbbf24;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="catalog-body">
+<div class="catalog-page">
+
+    <header class="catalog-header">
+        <div class="catalog-header-brand">
+            <h1 class="catalog-title">Offene Aufträge</h1>
+            <p class="catalog-subtitle">Bearbeitung und Abschluss von Bestellungen</p>
+        </div>
+    </header>
+
+    <section class="open-orders-card">
+        <div id="openOrdersStatus" class="open-orders-status">🔄 Lade offene Aufträge …</div>
+
+        <table class="open-orders-table">
+            <thead>
+            <tr>
+                <th>Auftrags-ID</th>
+                <th>Kunde</th>
+                <th>Fahrzeuge</th>
+                <th>Status (intern)</th>
+                <th>Interne Notiz</th>
+                <th>Abgeschlossen</th>
+                <th>Aktion</th>
+            </tr>
+            </thead>
+            <tbody id="openOrdersBody"></tbody>
+        </table>
+    </section>
+
+    <footer class="catalog-footer">
+        <p class="catalog-footer-text">
+            © <span id="openOrdersYear"></span> Fahrzeug-Shop
+        </p>
+    </footer>
+</div>
+
+<script>
+(function(){
+    const APP_SCRIPT_URL = "https://script.google.com/macros/s/DEINE_WEB_APP_URL/exec"; // TODO anpassen
+
+    const yearEl   = document.getElementById("openOrdersYear");
+    const statusEl = document.getElementById("openOrdersStatus");
+    const tbody    = document.getElementById("openOrdersBody");
+
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+    function createRow(order){
+        const tr = document.createElement("tr");
+
+        const tdId    = document.createElement("td");
+        const tdCust  = document.createElement("td");
+        const tdItems = document.createElement("td");
+        const tdStat  = document.createElement("td");
+        const tdNote  = document.createElement("td");
+        const tdDone  = document.createElement("td");
+        const tdAct   = document.createElement("td");
+
+        tdId.innerHTML = "<strong>" + (order.id || "") + "</strong><br><span style='font-size:0.78rem;color:#9ca3af'>"
+            + (order.createdAt || "") + "</span>";
+
+        tdCust.innerHTML = "<strong>" + (order.customerName || "") + "</strong><br><span style='font-size:0.78rem;color:#9ca3af'>"
+            + (order.customerContact || "") + "</span>";
+
+        tdItems.textContent = order.itemsSummary || "";
+
+        const statusInput = document.createElement("input");
+        statusInput.className = "open-orders-input";
+        statusInput.value = order.status || "";
+        tdStat.appendChild(statusInput);
+
+        const noteArea = document.createElement("textarea");
+        noteArea.className = "open-orders-textarea";
+        noteArea.value = order.internalNote || "";
+        tdNote.appendChild(noteArea);
+
+        const doneCheckbox = document.createElement("input");
+        doneCheckbox.type = "checkbox";
+        doneCheckbox.className = "open-orders-checkbox";
+        doneCheckbox.checked = !!order.completed;
+        tdDone.appendChild(doneCheckbox);
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "open-orders-save-btn";
+        saveBtn.textContent = "Speichern";
+
+        const badge = document.createElement("div");
+        badge.className = "open-orders-badge";
+        badge.textContent = "offen";
+
+        tdAct.appendChild(saveBtn);
+        tdAct.appendChild(document.createElement("br"));
+        tdAct.appendChild(badge);
+
+        saveBtn.addEventListener("click", async () => {
+            saveBtn.disabled = true;
+            saveBtn.textContent = "…";
+
+            const payload = {
+                action: "updateOrder",
+                orderId: order.id,
+                status: statusInput.value.trim(),
+                internalNote: noteArea.value.trim(),
+                completed: doneCheckbox.checked
+            };
+
+            try{
+                const res = await fetch(APP_SCRIPT_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                if(!res.ok || data.status !== "ok"){
+                    throw new Error(data.message || ("Fehlercode " + res.status));
+                }
+
+                if(doneCheckbox.checked){
+                    tr.remove(); // nicht mehr offen
+                }else{
+                    badge.textContent = "geändert";
+                }
+            }catch(err){
+                console.error(err);
+                alert("Fehler beim Speichern: " + err.message);
+            }finally{
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Speichern";
+            }
+        });
+
+        tr.appendChild(tdId);
+        tr.appendChild(tdCust);
+        tr.appendChild(tdItems);
+        tr.appendChild(tdStat);
+        tr.appendChild(tdNote);
+        tr.appendChild(tdDone);
+        tr.appendChild(tdAct);
+        return tr;
+    }
+
+    function renderOrders(list){
+        tbody.innerHTML = "";
+        if(!list || !list.length){
+            statusEl.textContent = "Keine offenen Aufträge vorhanden.";
+            return;
+        }
+        statusEl.textContent = list.length + " offene Auftrag/⸱e.";
+        list.forEach(o => tbody.appendChild(createRow(o)));
+    }
+
+    async function loadOpenOrders(){
+        try{
+            statusEl.textContent = "🔄 Lade offene Aufträge …";
+            const res = await fetch(APP_SCRIPT_URL + "?action=listOpenOrders");
+            const data = await res.json();
+            if(data.status !== "ok"){
+                throw new Error(data.message || "Unbekannter Fehler");
+            }
+            renderOrders(data.orders || []);
+        }catch(err){
+            console.error(err);
+            statusEl.textContent = "❌ Fehler beim Laden: " + err.message;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadOpenOrders);
+})();
+</script>
+</body>
+</html>
