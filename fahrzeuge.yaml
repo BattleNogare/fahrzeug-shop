@@ -1,6 +1,8 @@
 fahrzeuge:
   - id: bt_sentinel_s
+    id-nr: 1
     name: "BraunTech Sentinel S"
+    typ: pkw
     beschreibung: |
       Die BraunTech Sentinel S ist eine kompakte Limousine mit ausgewogenem
       Verhältnis aus Effizienz und Fahrspaß. Ideal als Alltagsfahrzeug,
@@ -25,7 +27,9 @@ fahrzeuge:
     neupreis: 32990
 
   - id: bt_ranger_x
+    id-nr: 1
     name: "BraunTech Ranger X Offroad"
+    typ: lkw
     beschreibung: |
       Der Ranger X ist das Offroad-Arbeitstier im BraunTech-Portfolio.
       Hohe Bodenfreiheit, Allradantrieb und robuste Technik machen ihn
@@ -54,7 +58,9 @@ fahrzeuge:
         preis: 2900
 
   - id: bt_aurora_ev
+    id-nr: 1
     name: "BraunTech Aurora EV"
+    typ: rucksack
     beschreibung: |
       Vollelektrische Limousine mit hoher Reichweite und modernem Innenraum.
       Der Aurora EV kombiniert leises, lokales Emissionsfrei-Fahren mit
