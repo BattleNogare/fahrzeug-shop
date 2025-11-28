@@ -24,7 +24,7 @@
 
         <!-- Optional: später Filter / Suche einbauen -->
         <div class="catalog-header-actions" id="catalogHeaderActions">
-            <!-- z.B. Filter nach Kraftstoff, Preis etc. -->
+            <!-- z.B. Filter nach Typ, Kraftstoff, Preis etc. -->
         </div>
     </header>
 
@@ -35,11 +35,11 @@
         </div>
     </section>
 
-    <!-- Fahrzeug-Gitter -->
+    <!-- Fahrzeug-Gruppen -->
     <main class="catalog-main">
         <section class="catalog-grid-section">
             <div id="vehicleGrid" class="vehicle-grid">
-                <!-- Karten werden per JS eingefügt -->
+                <!-- Hier werden gruppierte Fahrzeugkarten per JS eingefügt -->
             </div>
         </section>
     </main>
@@ -114,14 +114,13 @@
 
     function euro(value){
         if(value === null || value === undefined || value === "") return "";
-        // Numeric vs. String
         if(typeof value === "number"){
             return value.toLocaleString("de-DE") + " €";
         }
         const s = String(value).trim().replace(/[^\d.,-]/g, "");
         if(!s) return "";
-        const lastDot  = s.lastIndexOf(".");
-        const lastComma= s.lastIndexOf(",");
+        const lastDot   = s.lastIndexOf(".");
+        const lastComma = s.lastIndexOf(",");
         let norm = s;
 
         if(lastComma > lastDot){
@@ -147,13 +146,33 @@
         return [dt, dd];
     }
 
+    // id_nr sinnvoll in Zahl umwandeln (für Sortierung)
+    function parseIdNr(raw){
+        const maybe =
+            raw.id_nr   ?? raw["id-nr"] ??
+            raw.idNr    ?? raw.IdNr    ??
+            raw["id nr"] ?? null;
+
+        const val = maybe !== null && maybe !== undefined ? maybe : null;
+        if(val === null) return Number.POSITIVE_INFINITY;
+        const n = Number(val);
+        return isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    }
+
     function normalizeVehicle(raw){
         if(!raw || typeof raw !== "object") return {};
 
         const v = {};
 
-        // Basis
+        // ID: kann eine String-ID sein (für interne Zuordnung)
         v.id                    = raw.id || raw.ID || null;
+        // id_nr: Nummer für Sortierung innerhalb des Typs (MUSS in YAML vorhanden sein)
+        v.idNr                  = parseIdNr(raw);
+
+        // Typ: MUSS in YAML vorhanden sein
+        v.typ                   = raw.typ || raw.Typ || raw.type || raw.Type || "Sonstige";
+
+        // Basisdaten
         v.name                  = raw.name || raw.Name || "";
         v.beschreibung          = raw.beschreibung || raw.Beschreibung || "";
         v.bild1                 = raw.bild1 || raw.Bild1 || raw.bild || raw.Bild || "";
@@ -185,7 +204,7 @@
                 preis: u.preis || u.Preis || null
             }));
         }else{
-            // Rückwärts-kompatibel zu Upgradepreis1-x
+            // Rückwärts-kompatibel zu Upgradepreis1-x (falls du sowas irgendwann noch verwendest)
             const ups = [];
             if(raw.Upgradepreis1 || raw.upgradepreis1){
                 ups.push({name: raw.Upgrade1Name || raw.upgrade1Name || "Upgrade 1", preis: raw.Upgradepreis1 || raw.upgradepreis1});
@@ -202,67 +221,49 @@
         return v;
     }
 
-    /* ===== Rendering der Karten ===== */
+    /* ===== Karten-Erzeugung ===== */
 
-    function renderVehicles(){
-        gridEl.innerHTML = "";
+    function buildVehicleCard(v){
+        const card = document.createElement("article");
+        card.className = "vehicle-card";
 
-        if(!vehicles.length){
-            if(hintBox){
-                hintBox.textContent = "Keine Fahrzeuge gefunden.";
-                hintBox.classList.add("catalog-hint-error");
-            }
-            return;
+        const img = document.createElement("img");
+        img.className = "vehicle-card-image";
+        img.src = v.bild1 || v.bild2 || "";
+        img.alt = v.name || "Fahrzeug";
+
+        const meta = document.createElement("div");
+        meta.className = "vehicle-card-meta";
+
+        const nameEl = document.createElement("h2");
+        nameEl.className = "vehicle-card-name";
+        nameEl.textContent = v.name || "Unbenanntes Fahrzeug";
+
+        const priceEl = document.createElement("p");
+        priceEl.className = "vehicle-card-price";
+        priceEl.textContent = v.neupreis ? euro(v.neupreis) : "";
+
+        const speedEl = document.createElement("p");
+        speedEl.className = "vehicle-card-speed";
+        if(v.hoechstgeschwindigkeit){
+            speedEl.textContent = v.hoechstgeschwindigkeit + " km/h";
         }
 
-        if(hintBox){
-            hintBox.style.display = "none";
-        }
+        meta.appendChild(nameEl);
+        if(priceEl.textContent) meta.appendChild(priceEl);
+        if(speedEl.textContent) meta.appendChild(speedEl);
 
-        vehicles.forEach((v, idx) => {
-            const card = document.createElement("article");
-            card.className = "vehicle-card";
-            card.dataset.index = String(idx);
+        card.appendChild(img);
+        card.appendChild(meta);
 
-            const img = document.createElement("img");
-            img.className = "vehicle-card-image";
-            img.src = v.bild1 || v.bild2 || "";
-            img.alt = v.name || "Fahrzeug";
+        card.addEventListener("click", () => openModalByVehicle(v));
 
-            const meta = document.createElement("div");
-            meta.className = "vehicle-card-meta";
-
-            const nameEl = document.createElement("h2");
-            nameEl.className = "vehicle-card-name";
-            nameEl.textContent = v.name || "Unbenanntes Fahrzeug";
-
-            const priceEl = document.createElement("p");
-            priceEl.className = "vehicle-card-price";
-            priceEl.textContent = v.neupreis ? euro(v.neupreis) : "";
-
-            const speedEl = document.createElement("p");
-            speedEl.className = "vehicle-card-speed";
-            if(v.hoechstgeschwindigkeit){
-                speedEl.textContent = v.hoechstgeschwindigkeit + " km/h";
-            }
-
-            meta.appendChild(nameEl);
-            if(priceEl.textContent) meta.appendChild(priceEl);
-            if(speedEl.textContent) meta.appendChild(speedEl);
-
-            card.appendChild(img);
-            card.appendChild(meta);
-
-            card.addEventListener("click", () => openModal(idx));
-
-            gridEl.appendChild(card);
-        });
+        return card;
     }
 
     /* ===== Modal ===== */
 
-    function openModal(index){
-        const v = vehicles[index];
+    function openModalByVehicle(v){
         if(!v) return;
 
         document.body.classList.add("catalog-has-overlay");
@@ -368,6 +369,70 @@
             closeModal();
         }
     });
+
+    /* ===== Rendering: Gruppierung nach Typ + Sortierung nach id_nr ===== */
+
+    function renderVehicles(){
+        gridEl.innerHTML = "";
+
+        if(!vehicles.length){
+            if(hintBox){
+                hintBox.textContent = "Keine Fahrzeuge gefunden.";
+                hintBox.classList.add("catalog-hint-error");
+            }
+            return;
+        }
+
+        if(hintBox){
+            hintBox.style.display = "none";
+        }
+
+        // Gruppen: Map<Typ, Fahrzeug[]>
+        const groups = new Map();
+        vehicles.forEach(v => {
+            const t = v.typ || "Sonstige";
+            if(!groups.has(t)){
+                groups.set(t, []);
+            }
+            groups.get(t).push(v);
+        });
+
+        // Typ-Namen sortieren (alphabetisch, deutsch)
+        const sortedTypes = Array.from(groups.keys()).sort((a,b) =>
+            a.localeCompare(b, "de", { sensitivity: "base" })
+        );
+
+        sortedTypes.forEach(typeName => {
+            const groupVehicles = groups.get(typeName) || [];
+
+            // Innerhalb der Gruppe nach id_nr aufsteigend sortieren
+            groupVehicles.sort((a,b) => {
+                const aNr = (a.idNr !== undefined && a.idNr !== null) ? a.idNr : Number.POSITIVE_INFINITY;
+                const bNr = (b.idNr !== undefined && b.idNr !== null) ? b.idNr : Number.POSITIVE_INFINITY;
+                return aNr - bNr;
+            });
+
+            // Gruppen-Wrapper
+            const groupEl = document.createElement("section");
+            groupEl.className = "vehicle-group";
+
+            const heading = document.createElement("h2");
+            heading.className = "vehicle-group-title";
+            heading.textContent = typeName;
+            groupEl.appendChild(heading);
+
+            const groupGrid = document.createElement("div");
+            groupGrid.className = "vehicle-group-grid";
+
+            groupVehicles.forEach(v => {
+                const card = buildVehicleCard(v);
+                groupGrid.appendChild(card);
+            });
+
+            groupEl.appendChild(groupGrid);
+            gridEl.appendChild(groupEl);
+        });
+    }
 
     /* ===== Initiales Laden ===== */
 
