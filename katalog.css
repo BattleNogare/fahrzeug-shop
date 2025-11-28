@@ -1,0 +1,540 @@
+/* ================================
+   Basis-Theme – Darkmode
+   Theme-Color: #ff9900
+================================ */
+
+:root {
+    --accent: #ff9900;
+    --accent-soft: rgba(255, 153, 0, 0.18);
+    --accent-strong: rgba(255, 153, 0, 0.6);
+
+    --bg-page: #050608;
+    --bg-elevated: #101217;
+    --bg-elevated-soft: #161925;
+
+    --text: #f5f5f5;
+    --text-muted: #9ca3af;
+    --text-soft: #6b7280;
+
+    --border-subtle: #222633;
+    --border-strong: #323648;
+
+    --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+
+    --transition-fast: 0.16s ease-out;
+    --transition-med: 0.22s ease-out;
+    --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ================================
+   Grundlayout
+================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body.catalog-body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    background: radial-gradient(1200px 600px at 10% -20%, #ff990011, transparent 70%),
+                radial-gradient(900px 600px at 110% 120%, #ff990008, transparent 65%),
+                var(--bg-page);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Wenn Overlay offen → Scrollen verhindern */
+body.catalog-has-overlay {
+    overflow: hidden;
+}
+
+.catalog-page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 2.2rem 1.3rem 2rem;
+}
+
+/* ================================
+   Header
+================================ */
+
+.catalog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.1rem 1.3rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    background:
+        radial-gradient(800px 450px at 0% 0%, rgba(255, 153, 0, 0.16), transparent 60%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.5));
+    box-shadow:
+        0 14px 45px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.catalog-header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.catalog-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.catalog-subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.96rem;
+}
+
+.catalog-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* Platzhalter für spätere Filter/Buttons */
+.catalog-header-actions > * {
+    color: var(--text-muted);
+}
+
+/* ================================
+   Hinweis / Status
+================================ */
+
+.catalog-hint-section {
+    margin-top: 1.2rem;
+    margin-bottom: 0.6rem;
+}
+
+.catalog-hint {
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.6));
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.catalog-hint-error {
+    border-color: #f97373;
+    color: #fecaca;
+    background:
+        radial-gradient(650px 350px at 10% -10%, rgba(248, 113, 113, 0.18), transparent 60%),
+        linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+}
+
+/* ================================
+   Main + Grid
+================================ */
+
+.catalog-main {
+    margin-top: 1.4rem;
+}
+
+.catalog-grid-section {
+    padding: 0;
+}
+
+.vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1rem;
+}
+
+@media (max-width: 980px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .catalog-page {
+        padding-inline: 0.9rem;
+    }
+    .vehicle-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ================================
+   Fahrzeugkarten
+================================ */
+
+.vehicle-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.82));
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+}
+
+.vehicle-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(400px 180px at 0 0, rgba(255, 153, 0, 0.24), transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-med);
+}
+
+.vehicle-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.75);
+    border-color: var(--accent-soft);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(8, 10, 18, 0.96));
+}
+
+.vehicle-card:hover::before {
+    opacity: 1;
+}
+
+.vehicle-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #020617;
+    display: block;
+}
+
+.vehicle-card-meta {
+    padding: 0.75rem 0.95rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.vehicle-card-name {
+    margin: 0;
+    font-size: 1.03rem;
+    font-weight: 600;
+}
+
+.vehicle-card-price {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.vehicle-card-speed {
+    margin: 0.05rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-soft);
+}
+
+/* ================================
+   Footer
+================================ */
+
+.catalog-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+}
+
+.catalog-footer-text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* ================================
+   Overlay / Modal
+================================ */
+
+.vehicle-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 40;
+}
+
+.vehicle-overlay.vehicle-overlay-open {
+    display: block;
+}
+
+.vehicle-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(4px) saturate(120%);
+    background:
+        radial-gradient(900px 700px at 10% -10%, rgba(255, 153, 0, 0.32), transparent 70%),
+        radial-gradient(900px 700px at 100% 110%, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.95));
+}
+
+/* Modal-Container */
+.vehicle-modal {
+    position: relative;
+    z-index: 41;
+    max-width: 1040px;
+    width: calc(100% - 2.4rem);
+    max-height: calc(100% - 2.4rem);
+    margin: 1.2rem auto;
+    border-radius: 22px;
+    border: 1px solid var(--border-strong);
+    background:
+        radial-gradient(900px 450px at 0 0, rgba(255, 153, 0, 0.2), transparent 65%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(3, 7, 18, 0.98));
+    box-shadow:
+        0 32px 90px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.07);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Close-Button */
+.vehicle-modal-close {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.8rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(15, 23, 42, 0.9);
+    color: var(--text-soft);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0;
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.vehicle-modal-close:hover {
+    background: var(--accent-strong);
+    color: #000;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Modal Layout */
+.vehicle-modal-layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1.1fr;
+    gap: 0;
+}
+
+@media (max-width: 960px) {
+    .vehicle-modal-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Linke Seite: Bilder */
+.vehicle-modal-media {
+    background: radial-gradient(900px 600px at 10% 0, rgba(255, 153, 0, 0.25), transparent 65%),
+                linear-gradient(180deg, #020617, #020617);
+    border-right: 1px solid rgba(15, 23, 42, 0.9);
+    display: flex;
+    flex-direction: column;
+}
+
+.vehicle-modal-image-main {
+    width: 100%;
+    height: 320px;
+    object-fit: contain;
+    background: #020617;
+}
+
+.vehicle-modal-gallery {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.5rem 0.7rem 0.8rem;
+    overflow-x: auto;
+    border-top: 1px solid rgba(15, 23, 42, 0.9);
+}
+
+.vehicle-modal-gallery-image {
+    width: 76px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(31, 41, 55, 0.9);
+    cursor: pointer;
+    flex: 0 0 auto;
+    background: #020617;
+    transition:
+        border-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        opacity var(--transition-fast);
+    opacity: 0.9;
+}
+
+.vehicle-modal-gallery-image:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.75);
+    opacity: 1;
+}
+
+/* Rechte Seite: Inhalt */
+.vehicle-modal-body {
+    padding: 1.2rem 1.35rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.vehicle-modal-title {
+    margin: 0.2rem 0 0.25rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.vehicle-modal-price {
+    margin: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.02rem;
+}
+
+.vehicle-modal-description {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* Spezifikationen */
+.vehicle-specs-list {
+    margin: 0.6rem 0 0;
+    padding: 0.7rem 0.8rem;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-subtle);
+    background: radial-gradient(700px 400px at 0 0, rgba(255, 153, 0, 0.1), transparent 70%),
+                rgba(15, 23, 42, 0.9);
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 1.1rem;
+    row-gap: 0.15rem;
+    font-size: 0.9rem;
+}
+
+.vehicle-spec-label {
+    margin: 0;
+    color: var(--text-soft);
+    font-weight: 500;
+}
+
+.vehicle-spec-value {
+    margin: 0;
+    color: var(--text);
+}
+
+/* Upgrades */
+.vehicle-upgrades {
+    margin-top: 0.9rem;
+}
+
+.vehicle-upgrades-title {
+    margin: 0 0 0.4rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+}
+
+.vehicle-upgrades-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.vehicle-upgrades-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(31, 41, 55, 0.85);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.92));
+}
+
+.vehicle-upgrade-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.vehicle-upgrade-price {
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* ================================
+   Kleine Extras
+================================ */
+
+/* Scrollbar (optional, nur WebKit) */
+.vehicle-modal-gallery::-webkit-scrollbar {
+    height: 6px;
+}
+.vehicle-modal-gallery::-webkit-scrollbar-track {
+    background: transparent;
+}
+.vehicle-modal-gallery::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.7);
+    border-radius: 999px;
+}
+.vehicle-modal-gallery::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 153, 0, 0.8);
+}
+
+/* Fokusränder (für Tastatur-Nutzung) */
+.vehicle-card:focus-visible,
+.vehicle-modal-close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
