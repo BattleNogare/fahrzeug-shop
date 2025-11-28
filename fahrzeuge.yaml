@@ -1,0 +1,90 @@
+fahrzeuge:
+  - id: bt_sentinel_s
+    name: "BraunTech Sentinel S"
+    beschreibung: |
+      Die BraunTech Sentinel S ist eine kompakte Limousine mit ausgewogenem
+      Verhältnis aus Effizienz und Fahrspaß. Ideal als Alltagsfahrzeug,
+      zugleich ausreichend Leistung für die Autobahn.
+
+      Serienausstattung:
+      - LED-Scheinwerfer
+      - 2-Zonen-Klimaautomatik
+      - Infotainment mit 10"-Display
+    bild1: "bilder/fahrzeuge/sentinel_s_front.jpg"
+    bild2: "bilder/fahrzeuge/sentinel_s_side.jpg"
+    bilder_extra:
+      - "bilder/fahrzeuge/sentinel_s_innen.jpg"
+      - "bilder/fahrzeuge/sentinel_s_heck.jpg"
+    hoechstgeschwindigkeit: 220
+    leistung: 180          # PS
+    anzahl_sitze: 5
+    kofferraumgroesse: 480 # Liter
+    kofferraumtyp: "Limousine (Stufenheck)"
+    kraftstofftank: 60     # Liter
+    kraftstoffart: "Benzin"
+    neupreis: 32990
+    upgrades:
+      - name: "Sportpaket"
+        preis: 2500
+      - name: "Technikpaket Pro"
+        preis: 3100
+      - name: "Panorama-Glasdach"
+        preis: 1800
+
+  - id: bt_ranger_x
+    name: "BraunTech Ranger X Offroad"
+    beschreibung: |
+      Der Ranger X ist das Offroad-Arbeitstier im BraunTech-Portfolio.
+      Hohe Bodenfreiheit, Allradantrieb und robuste Technik machen ihn
+      zum perfekten Begleiter abseits befestigter Straßen.
+
+      Serienausstattung:
+      - Permanenter Allradantrieb
+      - Unterfahrschutz
+      - Anhängerkupplung (bis 3,5 t)
+    bild1: "bilder/fahrzeuge/ranger_x_front.jpg"
+    bild2: "bilder/fahrzeuge/ranger_x_offroad.jpg"
+    bilder_extra:
+      - "bilder/fahrzeuge/ranger_x_innen.jpg"
+    hoechstgeschwindigkeit: 190
+    leistung: 220          # PS
+    anzahl_sitze: 5
+    kofferraumgroesse: 780 # Ladefläche Liter-Äquivalent
+    kofferraumtyp: "Pickup-Ladefläche (Doppelkabine)"
+    kraftstofftank: 80     # Liter
+    kraftstoffart: "Diesel"
+    neupreis: 44990
+    upgrades:
+      - name: "Offroad-Pro-Paket (Seilwinde, Sperrdifferenziale)"
+        preis: 5200
+      - name: "Heavy-Duty-Fahrwerk"
+        preis: 2900
+
+  - id: bt_aurora_ev
+    name: "BraunTech Aurora EV"
+    beschreibung: |
+      Vollelektrische Limousine mit hoher Reichweite und modernem Innenraum.
+      Der Aurora EV kombiniert leises, lokales Emissionsfrei-Fahren mit
+      digitaler Cockpit-Architektur.
+
+      Serienausstattung:
+      - 77 kWh Batterie
+      - Schnellladefähigkeit (DC bis 170 kW)
+      - Head-Up-Display
+    bild1: "bilder/fahrzeuge/aurora_ev_front.jpg"
+    bild2: "bilder/fahrzeuge/aurora_ev_side.jpg"
+    hoechstgeschwindigkeit: 210
+    leistung: 250          # PS-Äquivalent
+    anzahl_sitze: 5
+    kofferraumgroesse: 540 # Liter gesamt (inkl. Frunk)
+    kofferraumtyp: "Fließheck mit zusätzlichem Frunk"
+    kraftstofftank: 0      # bei EV: 0 (wird als Batterie interpretiert)
+    kraftstoffart: "Elektro"
+    neupreis: 58990
+    upgrades:
+      - name: "Performance-Upgrade (Leistungssteigerung, größere Bremsen)"
+        preis: 6000
+      - name: "Autonomes Fahren Paket"
+        preis: 7500
+      - name: "Premium-Sound-System"
+        preis: 1900
